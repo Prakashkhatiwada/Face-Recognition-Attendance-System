@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FaceAttend — Smart Attendance System</title>
+    <meta name="description" content="Real-time face recognition attendance system for effortless employee tracking.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</head>
+
+<body>
+
+    <!-- ==================== DARK NAVBAR ==================== -->
+    <nav class="navbar navbar-expand-lg dark-navbar position-sticky top-0 sticky-top">
+        <div class="container">
+           <a class="navbar-brand d-flex align-items-center" href="/">
+                    <img src="{{ url_for('static', filename='images/facial_iconnn.png') }}" 
+                            alt="logo" width="35" height="35" class="me-2">
+                         <span>FaceAttend</span>
+            </a>
+            <div class="d-flex align-items-center gap-1">
+                <a href="/home" class="nav-link active">Home</a>
+                <a href="/user/summary" class="nav-link">Summary</a>
+                <a href="/user/notifications" class="nav-link">Notifications</a>
+                <a href="/user/activity" class="nav-link d-none d-md-inline">Activity</a>
+                <button class="theme-toggle-btn ms-2" aria-label="Toggle theme">
+                    <i class="material-icons" style="font-size:20px;">dark_mode</i>
+                </button>
+                <div class="nav-avatar ms-2 me-2">
+                    <i class="material-icons" style="font-size:18px;">person</i>
+                </div>
+                <a href="/admin_login" class="btn btn-nav-login">Admin Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ==================== HERO SECTION ==================== -->
+    <section class="hero-section">
+        <div class="container">
+            {% if mess %}
+            <div class="alert alert-info text-center mb-4 rounded-3 border-0 shadow-sm" role="alert">
+                <i class="material-icons align-middle me-1" style="font-size:20px;">info</i> {{ mess }}
+            </div>
+            {% endif %}
+
+            <div class="row align-items-center">
+                <div class="col-lg-6 fade-in-up">
+                    <h1 class="hero-title">
+                        Smart Attendance<br>with
+                        <span class="highlight">Face Recognition</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Automate employee attendance tracking with AI-powered face recognition.
+                        Fast, accurate, and effortless — just look at the camera.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="/start" class="btn gradient-btn btn-lg px-4 rounded-pill">
+                            <i class="material-icons align-middle me-1" style="font-size:20px;">videocam</i>
+                            Take Attendance
+                        </a>
+                        <a href="#attendance-section" class="btn hero-btn-outline btn-lg px-4">
+                            View Records
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-5 offset-lg-1 d-none d-lg-flex justify-content-end fade-in-up fade-in-up-delay">
+                    <div class="feature-float-card mt-5">
+                        <div class="icon-circle">
+                            <i class="material-icons">verified</i>
+                        </div>
+                        <div>
+                            <h6>Real-Time Recognition</h6>
+                            <p>Instant face detection and attendance logging with AI accuracy.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== STATS CARDS ==================== -->
+    <section class="py-4" style="margin-top: -2rem; position: relative; z-index: 10;">
+        <div class="container">
+            <div class="row g-3">
+                <div class="col-6 col-md-3 fade-in-up">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                            <i class="material-icons" style="font-size:22px;">people</i>
+                        </div>
+                        <div>
+                            <div class="stat-label">Registered</div>
+                            <div class="stat-value">{{ totalreg }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 fade-in-up fade-in-up-delay">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                            <i class="material-icons" style="font-size:22px;">check_circle</i>
+                        </div>
+                        <div>
+                            <div class="stat-label">Today Present</div>
+                            <div class="stat-value">{{ l if l else 0 }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 fade-in-up fade-in-up-delay">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                            <i class="material-icons" style="font-size:22px;">calendar_today</i>
+                        </div>
+                        <div>
+                            <div class="stat-label">Date</div>
+                            <div class="stat-value" style="font-size: 1rem;">{{ datetoday2 }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 fade-in-up fade-in-up-delay-2">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                            <i class="material-icons" style="font-size:22px;">schedule</i>
+                        </div>
+                        <div>
+                            <div class="stat-label">Current Time</div>
+                            <div class="stat-value" id="liveTime" style="font-size: 1rem;">--:--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== ATTENDANCE TABLE ==================== -->
+    <section class="py-5" id="attendance-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="d-flex justify-content-between align-items-end mb-4">
+                        <div>
+                            <h2 class="section-heading">
+                                <i class="material-icons align-middle text-primary" style="font-size:28px;">assignment</i>
+                                Today's Attendance
+                            </h2>
+                            <p class="section-subheading mb-0">Real-time tracking of employee presence.</p>
+                        </div>
+                        <a href="/start" class="btn gradient-btn rounded-pill px-4 d-none d-md-inline-flex align-items-center">
+                            <i class="material-icons me-1" style="font-size:18px;">add</i> Mark Attendance
+                        </a>
+                    </div>
+
+                    <div class="modern-card">
+                        <div class="table-responsive">
+                            <table class="table modern-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>SN</th>
+                                        <th>Employee Name</th>
+                                        <th>ID Number</th>
+                                        <th>Log Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if l %}
+                                    {% for i in range(l) %}
+                                    <tr>
+                                        <td class="text-muted fw-bold">#{{ i+1 }}</td>
+                                        <td class="fw-medium">{{ names[i] }}</td>
+                                        <td><span class="badge bg-light text-dark border px-2 py-1">{{ rolls[i] }}</span></td>
+                                        <td class="text-success fw-medium">{{ times[i] }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-5">
+                                            <i class="material-icons d-block mb-3" style="font-size: 48px; opacity: 0.25;">hourglass_empty</i>
+                                            No attendance records found for today yet.
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== QUICK ACCESS CARDS ==================== -->
+    <section class="pb-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <a href="/user/summary" class="quick-card">
+                        <div class="qc-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                            <i class="material-icons">analytics</i>
+                        </div>
+                        <h5>My Performance</h5>
+                        <p>View your attendance records, estimated payroll, and monthly performance overview.</p>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/user/notifications" class="quick-card">
+                        <div class="qc-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                            <i class="material-icons">notifications_active</i>
+                        </div>
+                        <h5>Notifications</h5>
+                        <p>Stay updated with system alerts, attendance confirmations, and important announcements.</p>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/user/activity" class="quick-card">
+                        <div class="qc-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                            <i class="material-icons">history</i>
+                        </div>
+                        <h5>Activity Log</h5>
+                        <p>Track all your recent actions — logins, check-ins, check-outs, and system interactions.</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer style="background: #1e1b3a; padding: 2rem 0;">
+        <div class="container text-center">
+            <p class="mb-0" style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">
+                &copy; 2026 FaceAttend — Face Recognition Attendance System
+            </p>
+        </div>
+    </footer>
+
+    <!-- ==================== SCRIPTS ==================== -->
+    <script>
+        function updateTime() {
+            var now = new Date();
+            var el = document.getElementById('liveTime');
+            if (el) {
+                el.textContent = now.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            }
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

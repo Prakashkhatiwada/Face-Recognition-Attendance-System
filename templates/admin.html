@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — FaceAttend</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</head>
+
+<body class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <a href="/home" class="admin-sidebar-logo">
+                <img src="{{ url_for('static', filename='images/facial_iconnn.png') }}" alt="logo" width="35"
+                    height="35">
+                <span>FaceAttend</span>
+            </a>
+        </div>
+        <nav class="admin-sidebar-nav">
+            <a href="/admin/dashboard" class="nav-item-admin active">
+                <i class="material-icons">dashboard</i>
+                Dashboard
+            </a>
+            <a href="/admin/attendance" class="nav-item-admin">
+                <i class="material-icons">event_note</i>
+                Attendance
+            </a>
+            <a href="/admin/payroll" class="nav-item-admin">
+                <i class="material-icons">account_balance_wallet</i>
+                Payroll
+            </a>
+            <a href="/admin/reports" class="nav-item-admin">
+                <i class="material-icons">assessment</i>
+                Reports
+            </a>
+            <hr class="mx-3 opacity-10">
+            <div class="px-3 mb-2 small text-muted text-uppercase fw-bold">Management</div>
+            <a href="#" class="nav-item-admin">
+                <i class="material-icons">people</i>
+                Employees
+            </a>
+            <a href="#" class="nav-item-admin">
+                <i class="material-icons">business</i>
+                Departments
+            </a>
+            <a href="#" class="nav-item-admin">
+                <i class="material-icons">settings</i>
+                Settings
+            </a>
+        </nav>
+        <div class="p-3 border-top">
+            <a href="/logout" class="nav-item-admin text-danger">
+                <i class="material-icons">logout</i>
+                Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <!-- Topbar -->
+        <header class="admin-topbar">
+            <div class="admin-search-wrapper">
+                <i class="material-icons admin-search-icon">search</i>
+                <input type="text" class="admin-search-input" id="employeeSearchInput"
+                    placeholder="Search employees...">
+                <div id="searchResults" class="search-results-dropdown shadow-lg d-none"></div>
+            </div>
+            <div class="admin-topbar-actions">
+                <button class="theme-toggle-btn glass-navbar" aria-label="Toggle theme">
+                    <i class="material-icons" style="font-size:20px;">dark_mode</i>
+                </button>
+                <div class="position-relative me-2">
+                    <i class="material-icons text-muted">notifications</i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                        style="font-size: 0.6rem;">3</span>
+                </div>
+                <div class="d-flex align-items-center gap-2 border-start ps-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                        style="width: 35px; height: 35px; font-weight: 600;">AP</div>
+                    <div class="d-none d-md-block">
+                        <div class="small fw-bold">Admin Portal</div>
+                        <div class="text-muted small" style="font-size: 0.7rem;">Admin</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="admin-content-inner">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="page-title mb-0">Dashboard</h2>
+                    <p class="text-muted small mb-0"><a href="/home" class="admin-breadcrumb-link">Home</a> / Dashboard</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm rounded-pill px-3" data-bs-toggle="modal"
+                        data-bs-target="#resetModal">
+                        <i class="material-icons align-middle me-1" style="font-size: 16px;">delete_forever</i> Reset
+                        System
+                    </button>
+                    <form action="/admin/retrain" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+                            <i class="material-icons align-middle me-1" style="font-size: 16px;">model_training</i>
+                            Retrain Model
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="admin-stat-card">
+                        <div class="stat-title">Total Employees</div>
+                        <div class="stat-value">{{ total_employees }}</div>
+                        <div class="stat-trend trend-up">
+                            <i class="material-icons" style="font-size: 14px;">trending_up</i>
+                            5.2% from last month
+                        </div>
+                        <div class="admin-stat-icon-box">
+                            <i class="material-icons">people</i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="admin-stat-card" style="border-left-color: var(--success);">
+                        <div class="stat-title">Present Today</div>
+                        <div class="stat-value">{{ present_today }}</div>
+                        <div class="stat-trend trend-down">
+                            <i class="material-icons" style="font-size: 14px;">trending_down</i>
+                            2.1% from yesterday
+                        </div>
+                        <div class="admin-stat-icon-box"
+                            style="background: rgba(16, 185, 129, 0.1); color: var(--success);">
+                            <i class="material-icons">check_circle</i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="admin-stat-card" style="border-left-color: var(--warning);">
+                        <div class="stat-title">Late Today</div>
+                        <div class="stat-value">{{ late_today }}</div>
+                        <div class="stat-trend trend-up">
+                            <i class="material-icons" style="font-size: 14px;">trending_up</i>
+                            3.7% from yesterday
+                        </div>
+                        <div class="admin-stat-icon-box"
+                            style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">
+                            <i class="material-icons">schedule</i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="admin-stat-card" style="border-left-color: var(--danger);">
+                        <div class="stat-title">Absent Today</div>
+                        <div class="stat-value">{{ absent_today }}</div>
+                        <div class="stat-trend trend-down">
+                            <i class="material-icons" style="font-size: 14px;">trending_down</i>
+                            1.5% from yesterday
+                        </div>
+                        <div class="admin-stat-icon-box"
+                            style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">
+                            <i class="material-icons">person_off</i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts & Actions -->
+            <div class="row g-4">
+                <!-- Analytics Chart -->
+                <div class="col-lg-8">
+                    <div class="modern-card p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0 fw-bold">Attendance Overview</h5>
+                            <div class="small text-muted">Last 7 Days</div>
+                        </div>
+                        <div style="height: 300px;">
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Registration / Quick Actions -->
+                <div class="col-lg-4">
+                    <div class="modern-card p-4 mb-4">
+                        <h5 class="mb-3 fw-bold text-success"><i
+                                class="material-icons align-middle me-2">person_add_alt_1</i> Face Enrollment</h5>
+                        <form action="/admin/add_user_init" method="POST">
+                            <div class="mb-3">
+                                <label for="newusername" class="form-label text-muted small fw-bold">Username</label>
+                                <input type="text" class="form-control" id="newusername" name="newusername" required>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-6 mb-3">
+                                    <label for="newuserid" class="form-label text-muted small fw-bold">ID Number</label>
+                                    <input type="number" class="form-control" id="newuserid" name="newuserid" min="1"
+                                        required>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label for="role" class="form-label text-muted small fw-bold">Shift</label>
+                                    <select class="form-select" name="role" id="role">
+                                        <option value="employee">Full Time</option>
+                                        <option value="part_time">Part Time</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 py-2 fw-bold rounded-pill shadow-sm">
+                                Begin Enrollment
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="modern-card p-4">
+                        <h5 class="mb-3 fw-bold text-danger"><i
+                                class="material-icons align-middle me-2">person_remove</i> Remove User</h5>
+                        <p class="text-muted small mb-3">Retraining is automatic after deletion.</p>
+                        <form id="deleteForm" method="POST">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="deleteUsername" placeholder="Username"
+                                    required>
+                                <button class="btn btn-danger px-3" type="button"
+                                    onclick="submitDelete()">Delete</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Status Donut Chart & Tables -->
+            <div class="row g-4 mt-2">
+                <div class="col-lg-4">
+                    <div class="modern-card p-4">
+                        <h5 class="mb-4 fw-bold">Attendance Status</h5>
+                        <div style="height: 250px;">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="modern-card p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0 fw-bold">Recent Kiosk Activity</h5>
+                            <a href="/admin/attendance"
+                                class="btn btn-link btn-sm text-primary text-decoration-none p-0">View All</a>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table modern-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Time</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if recent_activity %}
+                                    {% for activity in recent_activity %}
+                                    <tr class="small">
+                                        <td>{{ activity.username }}</td>
+                                        <td>{{ activity.check_in.strftime('%I:%M %p') if activity.check_in else '---' }}
+                                        </td>
+                                        <td>
+                                            {% if activity.status == 'present' %}
+                                            <span
+                                                class="badge bg-success-subtle text-success px-2 py-1 rounded-pill">Present</span>
+                                            {% elif activity.status == 'late' %}
+                                            <span
+                                                class="badge bg-warning-subtle text-warning px-2 py-1 rounded-pill">Late</span>
+                                            {% else %}
+                                            <span class="badge bg-danger-subtle text-danger px-2 py-1 rounded-pill">{{
+                                                activity.status|capitalize }}</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-3">No recent activity</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal fade" id="resetModal" tabindex="-1" aria-labelledby="resetModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="resetModalLabel">Factory Reset</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <div class="text-center mb-3">
+                        <i class="material-icons text-danger" style="font-size: 64px;">warning</i>
+                    </div>
+                    <p class="text-center mb-0">Are you sure you want to delete <strong>ALL</strong> registered faces
+                        and attendance records? This action is permanent and cannot be undone.</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4"
+                        data-bs-dismiss="modal">Cancel</button>
+                    <form action="/admin/reset_system" method="POST">
+                        <button type="submit" class="btn btn-danger rounded-pill px-4 shadow-sm">Yes, Reset
+                            System</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function submitDelete() {
+            const username = document.getElementById('deleteUsername').value.trim();
+            if (!username) {
+                alert("Please enter a username");
+                return;
+            }
+            if (confirm(`Are you sure you want to delete user: ${username}?`)) {
+                const form = document.getElementById('deleteForm');
+                form.action = `/admin/delete_user/${username}`;
+                form.submit();
+            }
+        }
+
+        // Attendance Overview Chart
+        const ctxAttendance = document.getElementById('attendanceChart').getContext('2d');
+        new Chart(ctxAttendance, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Attendance',
+                    data: [120, 125, 130, 135, 140, 138, 142],
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: false, grid: { display: true, color: 'rgba(0,0,0,0.05)' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Attendance Status Donut Chart
+        const ctxStatus = document.getElementById('statusChart').getContext('2d');
+        new Chart(ctxStatus, {
+            type: 'doughnut',
+            data: {
+                labels: ['Present', 'Late', 'Absent'],
+                datasets: [{
+                    data: [{{ present_today }}, {{ late_today }}, {{ absent_today }}],
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+            borderWidth: 0,
+            cutout: '70%'
+                }]
+            },
+            options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+            }
+        }
+        });
+
+        // Employee Search Functionalitiy
+        const searchInput = document.getElementById('employeeSearchInput');
+        const resultsDiv = document.getElementById('searchResults');
+
+        searchInput.addEventListener('input', function () {
+            const query = this.value.trim();
+            if (query.length < 1) {
+                resultsDiv.classList.add('d-none');
+                return;
+            }
+
+            fetch(`/admin/search_employee?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    resultsDiv.innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(user => {
+                            const statusClass = user.status === 'present' ? 'success' : (user.status === 'late' ? 'warning' : 'danger');
+                            const statusText = user.status ? (user.status.charAt(0).toUpperCase() + user.status.slice(1)) : 'Absent';
+
+                            const item = document.createElement('div');
+                            item.className = 'search-result-item d-flex align-items-center justify-content-between p-3 border-bottom cursor-pointer';
+                            item.innerHTML = `
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        <i class="material-icons text-muted">person</i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">${user.username}</div>
+                                        <div class="text-muted small">${user.role === 'employee' ? 'Full Time' : 'Part Time'}</div>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-${statusClass}-subtle text-${statusClass} rounded-pill px-3 py-2">${statusText}</span>
+                                    ${user.check_in ? `<div class="text-muted" style="font-size: 0.7rem; margin-top: 4px;">In: ${user.check_in}</div>` : ''}
+                                </div>
+                            `;
+                            resultsDiv.appendChild(item);
+                        });
+                        resultsDiv.classList.remove('d-none');
+                    } else {
+                        resultsDiv.innerHTML = '<div class="p-3 text-center text-muted">No employees found</div>';
+                        resultsDiv.classList.remove('d-none');
+                    }
+                });
+        });
+
+        // Close search results when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
+                resultsDiv.classList.add('d-none');
+            }
+        });
+    </script>
+</body>
+
+</html>

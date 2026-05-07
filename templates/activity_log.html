@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Log</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar { background: linear-gradient(90deg, #0062cc, #00c6ff); }
+        .card-custom { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/home">
+                <i class="material-icons me-2">arrow_back</i> Return Home
+            </a>
+            <div class="d-flex align-items-center">
+                <button class="theme-toggle-btn me-3" aria-label="Toggle theme">
+                    <i class="material-icons" style="font-size:20px;">dark_mode</i>
+                </button>
+                <span class="text-white fs-5 fw-bold"><i class="material-icons align-middle me-1">history</i> Activity Log</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card card-custom">
+            <div class="card-body p-4">
+                <h3 class="card-title mb-4">Your Recent Activity</h3>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Action</th>
+                                <th>Location</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if activities %}
+                                {% for item in activities %}
+                                <tr>
+                                    <td>{{ item.timestamp.strftime('%d %b %Y, %I:%M %p') }}</td>
+                                    <td class="fw-medium">{{ item.action }}</td>
+                                    <td class="text-muted"><i class="material-icons fs-6 align-middle">place</i> {{ item.location or 'System' }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr><td colspan="3" class="text-center text-muted py-4">No recent activity.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
